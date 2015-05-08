@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template
-from flask_login import login_required
+from flask import Blueprint, render_template, redirect, flash, request
+from flask_login import login_required, login_user
+import requests
 
-from extensions import login_manager
-from soul_cycle.api import login
+from extensions import login_manager, db
+import soul_cycle.api
 from soul_cycle.user.models import User
 from soul_cycle.user.forms import LoginForm
 
@@ -17,7 +18,23 @@ def load_user(id):
 def home():
     return 'hello world!'
 
-@bp.route('/user/login')
+@bp.route('/user/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    if form.validate_on_submit():
+        try:
+            with soul_cycle.api.login(form.email.data, form.password.data) as s:
+                if s.is_authenticated:
+                    user = User.query.filter_by(email=form.email.data).first()
+                    if user is None:
+                        user = User(email=form.email.data)
+                        db.session.add(user)
+                        db.session.commit()
+                    login_user(user)
+                    return redirect(request.args.get('next') or url_for('.home'))
+                else:
+                    flash('Invalid email or password', 'danger')
+        except requests.exceptions.RequestException as e:
+            flash('Request error. Please try again later', 'danger')
+                    
     return render_template('user/login.html', form=form)
