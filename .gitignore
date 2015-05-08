@@ -3,3 +3,6 @@
 *swo
 *.pw
 *.email
+.secret_key
+logs/*
+dbs/*
