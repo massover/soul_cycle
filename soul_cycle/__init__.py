@@ -1,7 +1,7 @@
 from flask import Flask
 import logging
 
-from extensions import db, login_manager
+from extensions import db, login_manager, bcrypt, admin, bootstrap
 
 def create_app(config):
     app = Flask(__name__)
@@ -18,12 +18,12 @@ def create_app(config):
 
     db.init_app(app)
 
-    from flask_bootstrap import Bootstrap
-    Bootstrap(app)
+    bcrypt.init_app(app)
 
-    from flask_admin import Admin
-    admin = Admin(app)
-    
+    bootstrap.init_app(app)
+
+    admin.init_app(app)
+
     from . import user
     app.register_blueprint(user.bp)
 
