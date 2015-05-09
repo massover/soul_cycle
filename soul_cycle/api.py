@@ -1,4 +1,5 @@
 import requests
+import logging
 from requests import Session
 from bs4 import BeautifulSoup
 
@@ -12,37 +13,44 @@ def parse_csrf_token(text):
     soup = BeautifulSoup(text)
     element = soup.find(attrs={'name': 'csrf_token'})
     if not (element and element.get('value')):
-        raise ParsingError(
-            'Error parsing csrf_token. No html element with name="crsf_token"'
-        )
+        error = 'Error parsing csrf_token. No html element with name="crsf_token"'
+        logging.error(error)
+        raise ParsingError(error)
     return element['value']
 
 def parse_seat(text):
     soup = BeautifulSoup(text)
     elements = soup.find_all('div', class_='seat open')
     if not (elements and elements[0].get('data-id')):
-        raise ParsingError(
-            'Error parsing seat. No html elements with class="seat open" or ' 
-            'missing data-id attribute'
-        )
+        error = 'Error parsing seat. No html elements with class="seat open"' + \
+                'or missing data-id attribute'
+        logging.error(error)
+        raise ParsingError(error)
     return elements[0]['data-id']
 
 def parse_reservation_id(text):
     soup = BeautifulSoup(text)
     element = soup.find(attrs={'data-reservation-id': True})
     if not (element and element.get('data-reservation-id')):
-        raise ParsingError(
-            'Error parsing data-reservation-id. No html element with that attr'
-        )
+        error = 'Error parsing data-reservation-id. No html element with that attr'
+        logging.error(error)
+        raise ParsingError(error)
     return element['data-reservation-id']
 
 def verify_json_response(r):
     if 'application/json' not in r.headers['content-type']:
-        raise JsonResponseError('Response from the server was not Json')
+        error = 'Response from the server was not Json'
+        logging.error(error)
+        raise JsonResponseError(error)
     if 'success' not in r.json():
-        raise JsonResponseError('Json response missing success field.')
+        error = 'Json response missing success field'
+        logging.error(error)
+        raise JsonResponseError(error)
     if str(r.json().get('success')) not in ['True', 'False']:
         raise JsonResponseError('Json success field not a boolean.')
+        error = 'Json response success field was not a boolean'
+        logging.error(error)
+        raise JsonResponseError(error)
 
 
 class SoulCycleSession(Session):
@@ -63,7 +71,9 @@ class SoulCycleSession(Session):
         r.raise_for_status()
         verify_json_response(r)
         if not r.json().get('success'):
-            raise JsonResponseError('Class %s registration error') 
+            error = 'Class %s registration error' % class_
+            logging.error(error)
+            raise JsonResponseError(error) 
 
 
     #@authentication_required
@@ -78,12 +88,15 @@ class SoulCycleSession(Session):
         r.raise_for_status()
         verify_json_response(r)
         if not r.json().get('success'):
-            raise JsonResponseError('Error unregistering for class')
+            error = 'Error unregistering for class'
+            logging.error(error)
+            raise JsonResponseError(error) 
 
 
     #@authentication_required
     def logout(self):
         r = self.get('https://www.soul-cycle.com/logout')
+        r.raise_for_status()
         self.is_authenticated = False
 
     
