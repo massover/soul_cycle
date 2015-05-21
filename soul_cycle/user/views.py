@@ -28,7 +28,7 @@ def login():
                 if s.is_authenticated:
                     user = User.query.filter_by(email=form.email.data).first()
                     if user is None:
-                        user = User(email=form.email.data)
+                        user = User(form.email.data, form.password.data)
                         db.session.add(user)
                         db.session.commit()
                     login_user(user)

@@ -1,4 +1,7 @@
+from flask import current_app as app
+
 from soul_cycle import create_app
+from soul_cycle.user.models import User
 from extensions import db
 import config
 
@@ -8,7 +11,7 @@ manager = Manager(create_app)
 
 @manager.shell
 def make_shell_context():
-    return dict(app=app)
+    return dict(app=app, db=db, User=User)
 
 
 @manager.command
