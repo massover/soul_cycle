@@ -1,6 +1,5 @@
 import unittest
-import main
-from soul_cycle import api
+import api
 
 class ApiTest(unittest.TestCase):
     def setUp(self):
@@ -21,8 +20,8 @@ class ApiTest(unittest.TestCase):
         with api.login(self.email, self.password) as s:
             s.register_for_class(379333)
             s.unregister_for_class()
-        
 
-        
 
-    
+
+
+

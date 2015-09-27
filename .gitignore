@@ -3,6 +3,7 @@
 *swo
 *.pw
 *.email
+venv/*
 .secret_key
 logs/*
 dbs/*
